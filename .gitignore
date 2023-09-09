@@ -1,0 +1,5 @@
+.env
+venv
+*.xlsx
+oauth2.json
+secrets.json
