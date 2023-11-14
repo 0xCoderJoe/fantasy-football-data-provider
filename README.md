@@ -16,7 +16,7 @@ Below are general setup instructions for running the provider as a console Pytho
 
 1. Clone the repository 
 
-    `git clone git@github.com:0xCoderJoe/fantasy-football-data-provider.git`
+    `git clone git@github.com:0xCoderJoe/fantasy-football-data-provider.git` 
 
 2. Open project
 
@@ -32,7 +32,7 @@ Below are general setup instructions for running the provider as a console Pytho
 
     `cp env.template .env`
 
-    Open the .env file and populate the respective environment variables with values in the prerequistie step.
+    Open the .env file and populate the respective environment variables with values in the prerequisite step.
 
 5. Run
 
