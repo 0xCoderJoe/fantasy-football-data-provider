@@ -6,6 +6,8 @@ import pandas as pd
 import dotenv
 import json
 import os
+import logging
+logging.basicConfig(level=logging.INFO)
 
 
 def handle_auth():
@@ -37,8 +39,8 @@ def acquire_team_obj(league, team_name):
 def get_all_league_players(league):
     '''Updates a database of all the leagues players and stats'''
     
-    update_players = os.environ.get('UPDATE_PLAYERS')
-    if update_players == "True":
+    use_cache = os.environ.get('USE_CACHE')
+    if use_cache == "False":
         all_available_players = league._fetch_players(status="A")
         teams = league.teams()
 
@@ -67,8 +69,8 @@ def get_all_league_players(league):
 
 def get_all_player_stats(league, players):
 
-    update_stats = os.environ.get('UPDATE_STATS')
-    if update_stats == "True":
+    use_cache = os.environ.get('USE_CACHE')
+    if use_cache == "False":
 
         all_player_stats = []
         for player in players:
@@ -117,22 +119,25 @@ def main():
 
     session = handle_auth()
     league = acquire_league_obj(session)
-    
+
+    logging.info("Collecting player data from Yahoo Fantasy")    
     all_players = get_all_league_players(league=league)
     collected_stats = get_all_player_stats(league=league, players=all_players)
-   
-    df = pd.DataFrame(collected_stats)
-    df.to_excel('ff_data.xlsx', index=False)
     
+    logging.info("Aggregating player data and stats..")
     combined_data = combine_data(all_players, collected_stats)
     
-    df = pd.DataFrame(combined_data)
-    df.to_excel('combined_data.xlsx', index=False)
+    if os.environ.get('WRITE_CACHE') == "True":
+        df = pd.DataFrame(combined_data)
+        df.to_excel('combined_data.xlsx', index=False)
 
+    logging.info('Updating our player database..')
     player_id_index = db.get_view(database=database, ddoc=ddoc, limit=1000, view=view)._to_dict()
+    
+    operations_watch=0
     for player in combined_data:
         
-        print(f"Processing: {player['name']}..")
+        logging.info(f"Processing: {player['name']}..")
         
         check_exists = [x for x in player_id_index['result']['rows'] if player['player_id'] == x['value']]
         if len(check_exists) == 1:
@@ -141,16 +146,34 @@ def main():
             player['_rev'] = curr_doc['result']['_rev']
             player['_id'] = curr_doc['result']['_id']
             
-            result = db.update_document(database=database, doc=player)
-        
-        elif len(check_exists) > 1:
-            print("existing docs greater than 1, might have dirty data")
-        
-        else:        
-            result = db.update_document(database=database, doc=player)
-        
-        sleep(1)
+            try:
+                db.update_document(database=database, doc=player)
+            
+            except Exception as e:
+                logging.error(f"ERROR - {e}")
 
+
+        elif len(check_exists) > 1:
+            logging.info("Documents returned greater than 1, might indicate an issue..skipping")
+            logging.warning(f"Check on records for {player['name']} in the database")
+        
+        else:
+
+            try:
+                db.update_document(database=database, doc=player)
+            
+            except Exception as e:
+                logging.error(f"ERROR - {e}")
+        
+        # Necessary timing functions for the free API
+        if operations_watch >= 10:
+            sleep(1)
+            operations_watch = 0
+        else:
+            operations_watch += 1
+            sleep(.03)
+
+    logging.info("The player provider has finished")
 
 if __name__=="__main__":
     main()

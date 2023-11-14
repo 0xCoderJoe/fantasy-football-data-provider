@@ -3,3 +3,6 @@ venv
 *.xlsx
 oauth2.json
 secrets.json
+player_data.json
+player_stats.json
+players.json
