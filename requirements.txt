@@ -1,3 +1,4 @@
+-e git+https://github.com/0xCoderJoe/nosql-common.git#egg=nosql-common
 yahoo_fantasy_api
 pandas
 openpyxl
