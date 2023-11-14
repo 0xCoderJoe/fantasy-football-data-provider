@@ -1,8 +1,8 @@
 # Fantasy Football Data Provider
 
-Fantasy football is not only fun to play with friends but is a great source of raw statistical data. This Python application is a backend job that aggregates player data Yahoo's fantasy football API into a document driven database; like Cloudant. 
+Fantasy football is not only fun to play with friends but is a great source of raw statistical data. This Python application is a backend job that aggregates player data from Yahoo's fantasy football API into a document driven database; like Cloudant. 
 
-This application consumes a custom database library, [nosql-common](https://github.com/0xCoderJoe/nosql-common), that abstracts the most common database routines we will encounter. It is also a good way to demonstrate competency in building Python packages that can be reused across different applications. 
+This application consumes a custom database library, [nosql-common](https://github.com/0xCoderJoe/nosql-common), that abstracts the most common database routines encountered. It is also a good way to demonstrate competency in building Python packages that can be reused across different applications. 
 
 This was meant to be a fun data transformation project and may provide future data for downstream analytical projects. 
 
